@@ -1,5 +1,5 @@
-# Christian Nash/ Christian Tuchez
-# 7/30/12
+# @author Christian Nash
+# @version 2.0 - 10/14/2013
 # XML Generator for testing purposes
 
 from tkinter import *
