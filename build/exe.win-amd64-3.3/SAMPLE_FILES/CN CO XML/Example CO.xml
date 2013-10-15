@@ -1,0 +1,117 @@
+<tXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="D:\2011.2\Regression Smoke Interface\From AIM\CO import\Customer Order Import.xsd">
+	<Header>
+		<Source>ECOM</Source> 
+		<Action_Type>Update</Action_Type> 
+		<Reference_ID>CN100053</Reference_ID> 
+		<Message_Type>CustomerOrder</Message_Type> 
+		<Company_ID>1</Company_ID> 
+	</Header>
+	<Message>
+		<Order>
+			<OrderNumber>CN100053</OrderNumber> 
+			<OrderCaptureDate>08/14/2013 13:03</OrderCaptureDate>
+			<ExternalOrderNumber>CN100053</ExternalOrderNumber> 
+			<OrderType>US-JC-Reg</OrderType> 
+			<OrderCurrency>USD</OrderCurrency> 
+			<EnteredBy>James Smith</EnteredBy> 
+			<EntryType>AOS</EntryType>
+			<Confirmed>TRUE</Confirmed> 
+			<PaymentDetails>
+				<PaymentDetail>
+					<ExternalPaymentDetailId>2013051602</ExternalPaymentDetailId>
+					<PaymentMethod>Others</PaymentMethod>
+					<AccountNumber>111111111</AccountNumber>
+					<ChargeSequence>1</ChargeSequence>
+					<ReqAuthorizationAmount>0.01</ReqAuthorizationAmount>
+					<BillToDetail>
+						<BillToFirstName>Christian</BillToFirstName> 
+						<BillToLastName>Nash</BillToLastName> 
+						<BillToAddressLine1>2300 Windy Ridge Pkwy SE</BillToAddressLine1> 
+						<BillToAddressLine2>9th Floor</BillToAddressLine2> 
+						<BillToCity>Atlanta</BillToCity> 
+						<BillToState>GA</BillToState> 
+						<BillToPostalCode>30339-1234</BillToPostalCode> 
+						<BillToCountry>US</BillToCountry> 
+						<BillToPhone>6785976264</BillToPhone> 
+						<BillToEmail>cnash@manh.com</BillToEmail> 
+					</BillToDetail>
+				</PaymentDetail>
+			</PaymentDetails>
+			<ReferenceFields>
+				<ReferenceField1>12345</ReferenceField1> 
+				<ReferenceField2>54321</ReferenceField2> 
+				<ReferenceField3>1</ReferenceField3> 
+			</ReferenceFields>
+			
+			<OrderLines>
+				<OrderLine>
+					<LineNumber>1</LineNumber> 
+					<ExternalLineID>2342662334</ExternalLineID> 
+					<ItemID>00231BR08937H-M</ItemID> 
+					<AllocationInfo>
+						<RequiredCapacityPerUnit>1</RequiredCapacityPerUnit>
+					</AllocationInfo>
+					<PriceInfo>
+						<Price>99.99</Price>
+					</PriceInfo>
+					<Quantity>
+						<OrderedQty>1</OrderedQty> 
+						<OrderedQtyUOM>ea</OrderedQtyUOM> 
+					</Quantity>
+					<ShippingInfo>
+						<RequestedDeliveryBy>09/19/13 12:00</RequestedDeliveryBy> 
+						<ShipVia>2DAY</ShipVia> 
+						<ShippingAddress>
+							<ShipToFirstName>Christian</ShipToFirstName> 
+							<ShipToLastName>Nash</ShipToLastName> 
+							<ShipToAddressLine1>1213 State St</ShipToAddressLine1> 
+							<ShipToAddressLine2>4th Floor</ShipToAddressLine2>
+							<ShipToCity>Santa Barbara</ShipToCity> 
+							<ShipToState>CA</ShipToState> 
+							<ShipToPostalCode>93101-1234</ShipToPostalCode> 
+							<ShipToCountry>US</ShipToCountry> 
+							<ShipToPhone>4042905555</ShipToPhone> 
+							<ShipToEmail>cnash@manh.com</ShipToEmail> 
+						</ShippingAddress>
+					</ShippingInfo>
+					<ChargeDetails>
+						<ChargeDetail>
+							<ExtChargeDetailId>60000001</ExtChargeDetailId> 
+							<ChargeCategory>Shipping</ChargeCategory> 
+							<ChargeAmount>30.00</ChargeAmount> 
+						</ChargeDetail>
+					</ChargeDetails>
+					<TaxDetails>
+						<TaxDetail>
+							<ExtTaxDetailId>2342341</ExtTaxDetailId> 
+							<TaxCategory>SalesTax</TaxCategory> 
+							<TaxLocationName/> 
+							<TaxName>Sales</TaxName> 
+							<TaxAmount>10.00</TaxAmount> 
+							<TaxDTTM>04/09/2013 13:02</TaxDTTM> 
+						</TaxDetail>
+						<TaxDetail>
+							<ExtTaxDetailId>2342342</ExtTaxDetailId> 
+							<TaxCategory>ShippingTax</TaxCategory> 
+							<TaxLocationName/> 
+							<TaxName>Shipping</TaxName> 
+							<TaxAmount>1.00</TaxAmount> 
+							<TaxDTTM>04/09/2013 13:02</TaxDTTM> 
+						</TaxDetail>
+					</TaxDetails>
+					
+					<LineReferenceFields>
+						<ReferenceField1>0</ReferenceField1> 
+						<ReferenceField2>1</ReferenceField2> 
+						<ReferenceField4>Khaki Pant</ReferenceField4> 
+						<ReferenceField5></ReferenceField5>
+						<ReferenceField6>Royal Navy</ReferenceField6>
+					</LineReferenceFields>
+				</OrderLine>
+				
+				
+				
+			</OrderLines>
+		</Order>
+	</Message>
+</tXML>
