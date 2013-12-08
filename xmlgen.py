@@ -82,8 +82,8 @@ class GUI:
         self.cont.grid(row=10, pady=5, columnspan=2)
 
         self.isWorking = True
-        #test = Button(f, text="Test", command=self.test)
-        #test.grid(row=11, pady=5, columnspan=2)
+        test = Button(f, text="Test", command=self.test)
+        test.grid(row=11, pady=5, columnspan=2)
 
         menubar = Menu(root)
         filemenu = Menu(menubar, tearoff=0)
@@ -243,9 +243,11 @@ class GUI:
         
         time.sleep(1)
 
+        self.cancel.config(state=DISABLED)
+        
         tkmb.showinfo("Success", "Files successfully generated at " + self.dirname)
 
-        self.cancel.config(state=DISABLED)
+        
         self.viewButton.config(state=NORMAL)
         self.closeProgress.config(state=NORMAL)
 
