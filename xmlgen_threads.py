@@ -143,6 +143,9 @@ class GUI:
             #self.DEntry.config(state='readonly')
 
     def doIt(self):
+        self.XMLfname = self.XMLEntry.get()
+        self.CSVfname = self.CSVEntry.get()
+        self.fDirectory = self.DEntry.get()
         if self.XMLfname == ". . .":
             tkmb.showwarning("Error", "Error opening XML file.  Please verify file path and extension (.xml only)")
             return
@@ -179,11 +182,10 @@ class GUI:
         except:
             tkmb.showwarning("Error", "Error opening CSV file.  Please verify file path and extension (.csv only)")
             return
-
-        print(os.direxists(self.fDirectory))
         
-        if not os.path.exists(self.fDirectory):
+        if not os.path.isdir(self.DEntry.get()):
             tkmb.showwarning("Error", "File path does not exist!")
+            return
         
         if (tkmb.askyesno("Continue?", "Auto-Generate " + str(len(self.csvdata)-1) + " XML Files from template at \"" + self.fDirectory + "\"?") == False):
             return
@@ -216,37 +218,19 @@ class GUI:
         self.datalen = len(self.csvdata)
         self.anum = 1
 
-        self.generate()
 
-        
-        
-        if not self.isWorking:
-            tkmb.showinfo("Failed", "Something done messed up.  Hopefully this just message just means you cancelled it")
-            self.closeProg()
-        
-        
-        
+        for self.x in range(len(self.csvdata)-1):
+            t = threading.Thread(target=self.generate)
+            t.daemon = True
+            t.start()
 
-    def generate(self):
-        
-        for x in range(len(self.csvdata)-1):
-            if not self.isWorking:
-                shutil.rmtree(self.dirname)
-                return
-            for y in range(len(self.csvdata[x+1])):
-                self.myRoot.find(self.csvdata[0][y]).text = self.csvdata[x+1][y]
-            self.myTree.write(os.path.join(self.dirname, self.filename + "_" + str(self.anum) + ".xml"))
-            self.progressLabel.config(text=("Generated "+str(self.anum+1)+" out of "+str(self.datalen)+" files"))
-            self.anum+=1
-            if self.anum < self.datalen:
-                self.progress.step()
-            self.end_time = time.time()
-            self.timeLabel.config(text=str(datetime.timedelta(seconds=math.ceil((self.end_time - self.start_time)))))
-            self.rootwin2.update()
-        
+        print ("test again")
+
         self.progress.config(value="100")
         
         time.sleep(1)
+
+        print ("test again2")
 
         self.cancel.config(state=DISABLED)
         
@@ -259,6 +243,32 @@ class GUI:
         self.rootwin2.lift()
 
         self.progress.config(value=str(len(self.csvdata)))
+        
+        
+        if not self.isWorking:
+            tkmb.showinfo("Failed", "Something done messed up.  Hopefully this just message just means you cancelled it")
+            self.closeProg()
+        
+        
+        
+
+    def generate(self):
+        if not self.isWorking:
+            shutil.rmtree(self.dirname)
+            return
+        for y in range(len(self.csvdata[self.x+1])):
+            self.myRoot.find(self.csvdata[0][y]).text = self.csvdata[self.x+1][y]
+        self.myTree.write(os.path.join(self.dirname, self.filename + "_" + str(self.anum) + ".xml"))
+        self.progressLabel.config(text=("Generated "+str(self.anum+1)+" out of "+str(self.datalen)+" files"))
+        self.anum+=1
+        if self.anum < self.datalen:
+            self.progress.step()
+        self.end_time = time.time()
+        self.timeLabel.config(text=str(datetime.timedelta(seconds=math.ceil((self.end_time - self.start_time)))))
+        self.rootwin2.update()
+        return
+        
+        
 
 
     def timer(self):
@@ -315,7 +325,7 @@ class GUI:
         self.XMLEntry.insert(0,self.XMLfname)
 
 
-        self.CSVfname = os.getcwd()+"/SAMPLE_FILES/SAMPLE_CSV_VERY_LARGE.csv"
+        self.CSVfname = os.getcwd()+"/SAMPLE_FILES/SAMPLE_CSV.csv"
         self.CSVEntry.delete(0,END)
         self.CSVEntry.insert(0,self.CSVfname)
 

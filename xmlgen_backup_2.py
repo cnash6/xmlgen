@@ -17,7 +17,6 @@ import threading
 from tkinter import tix
 import subprocess
 import math
-import queue
 
 
 class GUI:
@@ -115,6 +114,22 @@ class GUI:
 
     def openXMLFile(self): #this method opens a file dialog box when the select file button is clicked. it allows teh user to select a file with which he/she wishes to use. it puts teh file path in the file entry field and sets it to readonly so teh user can copy it but not manipulate it
         self.XMLfname = tkfd.askopenfilename()
+
+        try:
+            if len(self.XMLfname) < 5 or self.XMLfname[len(self.XMLfname)-4:] != '.xml':
+                raise ValueError
+            XMLfile = open(self.XMLfname,'r')
+            self.myTree = et.parse(XMLfile)
+            XMLfile.close()
+            self.myRoot = self.myTree.getroot()
+            self.filename = self.XMLfname[self.XMLfname.rfind('/')+1:len(self.XMLfname)-4]
+        except:
+            tkmb.showwarning("Error", "Error opening XML file.  Please verify file path and extension (.xml only)")
+            #self.XMLEntry.config(state=NORMAL)
+            self.XMLEntry.delete(0,END)
+            self.XMLEntry.insert(0,'. . .')
+            #self.XMLEntry.config(state='readonly')
+            return
         
         if self.XMLfname:
             #self.XMLEntry.config(state=NORMAL)
@@ -127,6 +142,24 @@ class GUI:
     
     def openCSVFile(self):
         self.CSVfname = tkfd.askopenfilename()
+
+        try:
+            if len(self.CSVfname) < 5 or self.CSVfname[len(self.CSVfname)-4:] != '.csv':
+                raise ValueError
+            CSVFile = open(self.CSVfname, 'r')
+            self.csvdata = CSVFile.readlines()
+            CSVFile.close()
+            for x in range(len(self.csvdata)):
+                self.csvdata[x] = self.csvdata[x].split(',')
+                self.csvdata[x][len(self.csvdata[x])-1] = self.csvdata[x][len(self.csvdata[x])-1][:len(self.csvdata[x][len(self.csvdata[x])-1])-1]
+        except:
+            tkmb.showwarning("Error", "Error opening CSV file.  Please verify file path and extension (.csv only)")
+            #self.CSVEntry.config(state=NORMAL)
+            self.CSVEntry.delete(0,END)
+            self.CSVEntry.insert(0,'. . .')
+            #self.CSVEntry.config(state='readonly')
+            return
+
         
         if self.CSVfname:
             #self.CSVEntry.config(state=NORMAL)
@@ -143,9 +176,6 @@ class GUI:
             #self.DEntry.config(state='readonly')
 
     def doIt(self):
-        self.XMLfname = self.XMLEntry.get()
-        self.CSVfname = self.CSVEntry.get()
-        self.fDirectory = self.DEntry.get()
         if self.XMLfname == ". . .":
             tkmb.showwarning("Error", "Error opening XML file.  Please verify file path and extension (.xml only)")
             return
@@ -157,35 +187,6 @@ class GUI:
         if self.fDirectory == ". . .":
             tkmb.showwarning("Error", "Error accessing File Destination.  Please verify file destination")
             return
-
-        try:
-            if len(self.XMLfname) < 5 or self.XMLfname[len(self.XMLfname)-4:] != '.xml':
-                raise ValueError
-            XMLfile = open(self.XMLfname,'r')
-            self.myTree = et.parse(XMLfile)
-            XMLfile.close()
-            self.myRoot = self.myTree.getroot()
-            self.filename = self.XMLfname[self.XMLfname.rfind('/')+1:len(self.XMLfname)-4]
-        except:
-            tkmb.showwarning("Error", "Error opening XML file.  Please verify file path and extension (.xml only)")
-            return
-        
-        try:
-            if len(self.CSVfname) < 5 or self.CSVfname[len(self.CSVfname)-4:] != '.csv':
-                raise ValueError
-            CSVFile = open(self.CSVfname, 'r')
-            self.csvdata = CSVFile.readlines()
-            CSVFile.close()
-            for x in range(len(self.csvdata)):
-                self.csvdata[x] = self.csvdata[x].split(',')
-                self.csvdata[x][len(self.csvdata[x])-1] = self.csvdata[x][len(self.csvdata[x])-1][:len(self.csvdata[x][len(self.csvdata[x])-1])-1]
-        except:
-            tkmb.showwarning("Error", "Error opening CSV file.  Please verify file path and extension (.csv only)")
-            return
-        
-        if not os.path.isdir(self.DEntry.get()):
-            tkmb.showwarning("Error", "File path does not exist!")
-            return
         
         if (tkmb.askyesno("Continue?", "Auto-Generate " + str(len(self.csvdata)-1) + " XML Files from template at \"" + self.fDirectory + "\"?") == False):
             return
@@ -194,17 +195,24 @@ class GUI:
         self.browse2.config(state=DISABLED)
         self.browse3.config(state=DISABLED)
         self.cont.config(state=DISABLED)
-
         
-            
         
         self.progressWin()
         
         self.timer()
+        self.generate()
+        
+        if not self.isWorking:
+            tkmb.showinfo("Failed", "Something done messed up.  Hopefully this just message just means you cancelled it")
+            self.rootwin2.destroy()
         
 
-        self.fields = self.csvdata[0]
-        for x in self.fields:
+        
+        
+
+    def generate(self):
+        fields = self.csvdata[0]
+        for x in fields:
             if self.myRoot.find(x) == None:
                 tkmb.showwarning("Error", "CSV fields not properly qualified.  Please verify that CSV column headers match XML elements")
                 return
@@ -216,10 +224,22 @@ class GUI:
 
         self.isWorking = True
         self.datalen = len(self.csvdata)
-        self.anum = 1
-
-        self.generate()
-
+        anum = 1
+        for x in range(len(self.csvdata)-1):
+            if not self.isWorking:
+                shutil.rmtree(self.dirname)
+                return
+            for y in range(len(self.csvdata[x+1])):
+                self.myRoot.find(self.csvdata[0][y]).text = self.csvdata[x+1][y]
+            self.myTree.write(os.path.join(self.dirname, self.filename + "_" + str(anum) + ".xml"))
+            self.progressLabel.config(text=("Generated "+str(anum+1)+" out of "+str(self.datalen)+" files"))
+            anum+=1
+            if anum < self.datalen:
+                self.progress.step()
+            self.end_time = time.time()
+            self.timeLabel.config(text=str(datetime.timedelta(seconds=math.ceil((self.end_time - self.start_time)))))
+            self.rootwin2.update()
+        
         self.progress.config(value="100")
         
         time.sleep(1)
@@ -235,33 +255,6 @@ class GUI:
         self.rootwin2.lift()
 
         self.progress.config(value=str(len(self.csvdata)))
-        
-        
-        if not self.isWorking:
-            tkmb.showinfo("Failed", "Something done messed up.  Hopefully this just message just means you cancelled it")
-            self.closeProg()
-        
-        
-        
-
-    def generate(self):
-        
-        for x in range(len(self.csvdata)-1):
-            if not self.isWorking:
-                shutil.rmtree(self.dirname)
-                return
-            for y in range(len(self.csvdata[x+1])):
-                self.myRoot.find(self.csvdata[0][y]).text = self.csvdata[x+1][y]
-            self.myTree.write(os.path.join(self.dirname, self.filename + "_" + str(self.anum) + ".xml"))
-            self.progressLabel.config(text=("Generated "+str(self.anum+1)+" out of "+str(self.datalen)+" files"))
-            self.anum+=1
-            if self.anum < self.datalen:
-                self.progress.step()
-            self.end_time = time.time()
-            self.timeLabel.config(text=str(datetime.timedelta(seconds=math.ceil((self.end_time - self.start_time)))))
-            self.rootwin2.update()
-        
-        
 
 
     def timer(self):
@@ -314,18 +307,33 @@ class GUI:
 
     def test(self):
         self.XMLfname = os.getcwd()+"/SAMPLE_FILES/SAMPLE_XML.xml"
+        #self.XMLEntry.config(state=NORMAL)
         self.XMLEntry.delete(0,END)
         self.XMLEntry.insert(0,self.XMLfname)
-
+        #self.XMLEntry.config(state='readonly')
+        XMLfile = open(self.XMLfname,'r')
+        self.myTree = et.parse(XMLfile)
+        XMLfile.close()
+        self.myRoot = self.myTree.getroot()
+        self.filename = self.XMLfname[self.XMLfname.rfind('/')+1:len(self.XMLfname)-4]
 
         self.CSVfname = os.getcwd()+"/SAMPLE_FILES/SAMPLE_CSV_VERY_LARGE.csv"
+        #self.CSVEntry.config(state=NORMAL)
         self.CSVEntry.delete(0,END)
         self.CSVEntry.insert(0,self.CSVfname)
+       # self.CSVEntry.config(state='readonly')
+        CSVFile = open(self.CSVfname, 'r')
+        self.csvdata = CSVFile.readlines()
+        CSVFile.close()
+        for x in range(len(self.csvdata)):
+            self.csvdata[x] = self.csvdata[x].split(',')
+            self.csvdata[x][len(self.csvdata[x])-1] = self.csvdata[x][len(self.csvdata[x])-1][:len(self.csvdata[x][len(self.csvdata[x])-1])-1]
 
         self.fDirectory = os.getcwd()+"\SAMPLE_FILES"
+        #self.DEntry.config(state=NORMAL)
         self.DEntry.delete(0,END)
         self.DEntry.insert(0,self.fDirectory)
-
+        #self.DEntry.config(state='readonly')
         
 ##        if self.isWorking == False:
 ##            self.isWorking = True
