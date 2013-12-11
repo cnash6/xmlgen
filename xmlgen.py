@@ -26,7 +26,7 @@ class GUI:
     def __init__(self):   # Init calls first window creator
         self.startPage()
 
-    def startPage(self):
+    def startPage(self):    # Sets up the main window
         self.rootwin = Tk()             
         self.rootwin.title("XML Generator")
         root = self.rootwin
@@ -83,11 +83,12 @@ class GUI:
         self.cont.grid(row=10, pady=5, columnspan=2)
 
         self.isWorking = True
-        test = Button(f, text="Test", command=self.test)
-        test.grid(row=11, pady=5, columnspan=2)
+        #test = Button(f, text="Test", command=self.test) ## Button used to quickly fill fields using sample files
+        #test.grid(row=11, pady=5, columnspan=2)
 
         menubar = Menu(root)
         filemenu = Menu(menubar, tearoff=0)
+        filemenu.add_command(label="Load Sample Set", command=self.test)
         filemenu.add_command(label="Exit", command=self.exitwin)
         menubar.add_cascade(label="File", menu=filemenu)
         helpmenu = Menu(menubar, tearoff=0)
@@ -101,48 +102,39 @@ class GUI:
 
     def showHelp(self): ## Shows help box
         tkmb.showinfo("Help",
-                      "XML Generator 1.0\nChristian Nash \n\n"
+                      "XML Generator 1.1\nChristian Nash\ncnash3712@gmail.com \n\n"
                       + "Instructions for use:\n\n"
                       + "Upload the desired XML file for replication. Then upload a CSV file with the following format:\n\n"
                       + "Parent/Child/DesiredField, Parent2/Child2/DesiredField2,\ndata1,\t\tdata2,\ndata1,\t\tdata2,\netc..."
                       + "\n\nThese CSV files are easily created by saving a excell spreadsheet in .csv format.\nSelect file destination and click \"Continue\" to auto-generate XML Files"
-                      + "\n\n-Not intended for use outside of Manhattan Associates Inc."
+                      + "\n\n*Not intended for use outside of Manhattan Associates Inc."
                       )
 
-    def exitwin(self):
+    def exitwin(self): # Exit the root window. Obviously
         self.rootwin.destroy()
         
 
-    def openXMLFile(self): #this method opens a file dialog box when the select file button is clicked. it allows teh user to select a file with which he/she wishes to use. it puts teh file path in the file entry field and sets it to readonly so teh user can copy it but not manipulate it
-        self.XMLfname = tkfd.askopenfilename()
+    def openXMLFile(self): # Asks user for XML file and enters it into text box
+        self.XMLfname = tkfd.askopenfilename() 
         
         if self.XMLfname:
-            #self.XMLEntry.config(state=NORMAL)
             self.XMLEntry.delete(0,END)
             self.XMLEntry.insert(0,self.XMLfname)
-            #self.XMLEntry.config(state='readonly')
-
-        
-
     
-    def openCSVFile(self):
+    def openCSVFile(self): # Asks user for CSV file and enters it into text box
         self.CSVfname = tkfd.askopenfilename()
         
         if self.CSVfname:
-            #self.CSVEntry.config(state=NORMAL)
             self.CSVEntry.delete(0,END)
             self.CSVEntry.insert(0,self.CSVfname)
-            #self.CSVEntry.config(state='readonly')
 
-    def getDirectory(self):
+    def getDirectory(self): # Asks user for a directory file and enters it into text box
         self.fDirectory = tkfd.askdirectory()
         if self.fDirectory:
-            #self.DEntry.config(state=NORMAL)
             self.DEntry.delete(0,END)
             self.DEntry.insert(0,self.fDirectory)
-            #self.DEntry.config(state='readonly')
-
-    def doIt(self):
+ 
+    def doIt(self): # Begins the main function.  This preps the xml file generation, sets up folders, opens files, etc...
         self.XMLfname = self.XMLEntry.get()
         self.CSVfname = self.CSVEntry.get()
         self.fDirectory = self.DEntry.get()
@@ -193,20 +185,13 @@ class GUI:
         self.browse1.config(state=DISABLED)
         self.browse2.config(state=DISABLED)
         self.browse3.config(state=DISABLED)
-        self.cont.config(state=DISABLED)
-
-        
-            
-        
-        self.progressWin()
-        
-        self.timer()
-        
+        self.cont.config(state=DISABLED) 
 
         self.fields = self.csvdata[0]
         for x in self.fields:
             if self.myRoot.find(x) == None:
                 tkmb.showwarning("Error", "CSV fields not properly qualified.  Please verify that CSV column headers match XML elements")
+                self.closeProg()
                 return
 
         self.dirname = os.path.join(self.fDirectory,strftime("AutoGen%m-%d-%Y %H.%M.%S",gmtime()))
@@ -218,17 +203,25 @@ class GUI:
         self.datalen = len(self.csvdata)
         self.anum = 1
 
+        self.progressWin()
+        
+        self.timer()
+
         self.generate()
 
-        self.progress.config(value="100")
+        #self.progress.config(value="100")
         
-        time.sleep(1)
+        #time.sleep(1)
 
         self.cancel.config(state=DISABLED)
-        
-        tkmb.showinfo("Success", "Files successfully generated at " + self.dirname)
 
-        
+        if self.isWorking:
+            tkmb.showinfo("Success", "Files successfully generated at " + self.dirname)
+        else:
+            tkmb.showinfo("Failed", "Something done messed up.  Hopefully this just message just means you cancelled it")
+            self.closeProg()
+            return
+
         self.viewButton.config(state=NORMAL)
         self.closeProgress.config(state=NORMAL)
 
@@ -237,9 +230,7 @@ class GUI:
         self.progress.config(value=str(len(self.csvdata)))
         
         
-        if not self.isWorking:
-            tkmb.showinfo("Failed", "Something done messed up.  Hopefully this just message just means you cancelled it")
-            self.closeProg()
+        
         
         
         
@@ -253,7 +244,7 @@ class GUI:
             for y in range(len(self.csvdata[x+1])):
                 self.myRoot.find(self.csvdata[0][y]).text = self.csvdata[x+1][y]
             self.myTree.write(os.path.join(self.dirname, self.filename + "_" + str(self.anum) + ".xml"))
-            self.progressLabel.config(text=("Generated "+str(self.anum+1)+" out of "+str(self.datalen)+" files"))
+            self.progressLabel.config(text=("Generated "+str(self.anum)+" out of "+str(self.datalen-1)+" files"))
             self.anum+=1
             if self.anum < self.datalen:
                 self.progress.step()
@@ -281,7 +272,7 @@ class GUI:
         self.progress = ttk.Progressbar(f, orient="horizontal", length=400, mode="determinate", maximum=len(self.csvdata))
         self.progress.grid(row=1, columnspan=2)
 
-        self.progressLabel = Label(f, text=("Generated 0 out of "+str(self.datalen)+" files"))
+        self.progressLabel = Label(f, text=("Generated 0 out of "+str(self.datalen-1)+" files"))
         self.progressLabel.grid(row=2, column=0)
 
         self.timeLabel = Label(f, text="00:00")

@@ -1,6 +1,8 @@
 from cx_Freeze import setup, Executable
 import sys
 
+includefiles = ['SAMPLE_FILES\SAMPLE_CSV.csv', 'SAMPLE_FILES\SAMPLE_CSV_VERY_LARGE.csv', 'SAMPLE_FILES\SAMPLE_XML.xml']
+
 ##productName = "XMLGenerator"
 ##if 'bdist_msi' in sys.argv:
 ##    sys.argv += ['--initial-target-dir', 'C:\InstallDir\\' + productName]
@@ -16,5 +18,7 @@ setup(
       version="2.0",
       author="Christian Nash",
       description="XML Generator for creating testing XMLs",
+      options = {'build_exe': {'include_files':includefiles}}, 
+
       executables=[exe],
       ) 
